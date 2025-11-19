@@ -138,6 +138,7 @@ def plot_region_center_view(region_df, region):
             map_center_lon=114.1694,
             margin={'r': 0, 't': 0, 'l': 0, 'b': 0},
             showlegend=False,
+            uirevision=region,
         )
 
     # Compute centroid of the combined geometry
@@ -170,6 +171,7 @@ def plot_region_center_view(region_df, region):
         map_center_lon=center_lon,
         margin={'r': 0, 't': 0, 'l': 0, 'b': 0},
         showlegend=False,
+        uirevision=region,
     )
 
     return fig
@@ -438,6 +440,7 @@ def plot_interactive_district(data_df, geo_df, district_code, zoom_data=None):
         map_center_lat=map_center_lat,
         map_center_lon=map_center_lon,
         margin={'r': 0, 't': 0, 'l': 0, 'b': 0},  # Remove margins
+        uirevision=district_code,  # Reset view when district changes
     )
     return fig
 
@@ -458,4 +461,5 @@ def default_map_figure():
         map_center_lat=22.3193,
         map_center_lon=114.1694,
         margin={'r': 0, 't': 0, 'l': 0, 'b': 0},
+        uirevision='Hong Kong',  # persistent view for default map
     )

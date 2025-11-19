@@ -553,14 +553,16 @@ def update_map(
     # Case 1: District selected - show all places
     if selected_district:
         district_code = district_to_code_dynamic.get(selected_district)
-        # Prioritize district_viewdata (fresh centroid) over mapview_data (user pan/zoom)
-        # Check if district_viewdata has valid zoom/center data
-        if district_viewdata and 'zoom' in district_viewdata and 'center' in district_viewdata:
-            view_data = district_viewdata
-        elif mapview_data and 'zoom' in mapview_data and 'center' in mapview_data:
-            view_data = mapview_data
+
+        # Calculate centroid inline to ensure we zoom to the NEWLY selected district
+        # (ignoring district_viewdata which might be stale due to callback race conditions)
+        filtered_geo = geo_df_dynamic[geo_df_dynamic['code'] == str(district_code)]
+        if not filtered_geo.empty:
+            centroid = filtered_geo['geometry'].iloc[0].centroid
+            view_data = {'zoom': 13, 'center': {'lat': centroid.y, 'lon': centroid.x}}
         else:
             view_data = {}
+
         return plot_interactive_district(
             place_data,
             geo_df_dynamic,

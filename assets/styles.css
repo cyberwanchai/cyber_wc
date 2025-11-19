@@ -1515,7 +1515,162 @@ body {
    Responsive Design
    ------------------------- */
 
+/* Mobile breakpoint for main explore page and other pages */
 @media (max-width: 768px) {
+    /* Main page header adjustments */
+    .header {
+        height: 60px;
+    }
+
+    .title-section {
+        font-size: 32px;
+        margin-left: 15px;
+    }
+
+    .hamburger-menu {
+        margin-right: 15px;
+    }
+
+    .nav-dropdown {
+        right: 0;
+        margin-right: 15px;
+        top: 60px;
+    }
+
+    .body {
+        padding-top: 70px;
+    }
+
+    /* Main content adjustments */
+    .main-content {
+        margin-left: 15px;
+        margin-right: 15px;
+        height: calc(100vh - 60px);
+    }
+
+    /* Sidebar full width on mobile */
+    .sidebar-container {
+        width: 100%;
+        padding-left: 0;
+        padding-right: 0;
+        margin-bottom: 15px;
+    }
+
+    /* Map section full width */
+    .map-section {
+        width: 100%;
+        padding-right: 0;
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+
+    .map-display {
+        min-height: 300px;
+    }
+
+    /* Description and instructions */
+    .site-description {
+        font-size: 18px;
+    }
+
+    .instructions {
+        font-size: 14px;
+    }
+
+    /* Dropdowns stack vertically and full width */
+    .dropdowns-container-main {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .dropdown-block {
+        min-width: 100%;
+        max-width: 100%;
+    }
+
+    /* Filters and details container */
+    .filters-and-details-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .star-filter-section {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .place-details-container {
+        max-width: 100%;
+        min-width: 100%;
+        margin-top: 15px;
+    }
+
+    /* Place details card */
+    .place-details {
+        padding: 12px;
+    }
+
+    .place-name {
+        font-size: 16px;
+    }
+
+    /* Touch target sizes - ensure minimum 44x44px */
+    .info-toggle-button {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 10px 15px;
+    }
+
+    .submit-city-button-mainpage,
+    .clear-city-button-mainpage {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 10px 15px;
+    }
+
+    .city-input-field {
+        min-height: 44px;
+        padding: 10px 15px;
+    }
+
+    .star-button,
+    .selected-toggle-button {
+        min-height: 44px;
+    }
+
+    .hamburger-menu {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .nav-link {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+    }
+
+    /* Footer adjustments */
+    .info-container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .info-text,
+    .info-link {
+        font-size: 11px;
+    }
+
+    .info-footer,
+    .disclaimer-text {
+        font-size: 8px;
+    }
+
+    /* Gallery and place detail pages */
     .gallery-grid {
         grid-template-columns: 1fr;
     }
@@ -1527,7 +1682,7 @@ body {
 
     .gallery-content,
     .place-detail-content {
-        padding-top: 100px;
+        padding-top: 80px;
         /* Adjusted for smaller header */
     }
 
@@ -1545,7 +1700,134 @@ body {
     }
 }
 
+/* Small phone breakpoint */
 @media (max-width: 480px) {
+    /* Header further reductions */
+    .header {
+        height: 55px;
+    }
+
+    .title-section {
+        font-size: 24px;
+        margin-left: 10px;
+    }
+
+    .hamburger-menu {
+        margin-right: 10px;
+        width: 20px;
+        height: 15px;
+        min-height: 44px;
+        min-width: 44px;
+        padding: 12px;
+    }
+
+    .bar {
+        height: 2px;
+    }
+
+    .nav-dropdown {
+        margin-right: 10px;
+        top: 55px;
+        padding: 8px;
+    }
+
+    .nav-link {
+        padding: 12px 16px;
+        font-size: 14px;
+        min-height: 44px;
+    }
+
+    /* Ensure touch targets remain 44x44px on small phones */
+    .info-toggle-button,
+    .submit-city-button-mainpage,
+    .clear-city-button-mainpage {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 10px 15px;
+    }
+
+    .city-input-field {
+        min-height: 44px;
+        padding: 10px 15px;
+    }
+
+    .star-button,
+    .selected-toggle-button {
+        min-height: 44px;
+    }
+
+    .body {
+        padding-top: 65px;
+    }
+
+    /* Main content further reductions */
+    .main-content {
+        margin-left: 10px;
+        margin-right: 10px;
+        height: calc(100vh - 55px);
+    }
+
+    /* Smaller fonts */
+    .site-description {
+        font-size: 16px;
+    }
+
+    .instructions {
+        font-size: 13px;
+    }
+
+    .dropdown-title {
+        font-size: 14px;
+    }
+
+    .star-select-title {
+        font-size: 14px;
+    }
+
+    /* Map minimum height */
+    .map-display {
+        min-height: 250px;
+    }
+
+    /* Place details */
+    .place-details {
+        padding: 10px;
+    }
+
+    .place-name {
+        font-size: 14px;
+    }
+
+    .place-date,
+    .place-description,
+    .place-condition,
+    .place-address,
+    .place-location {
+        font-size: 11px;
+    }
+
+    /* Footer */
+    .info-container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .info-image {
+        width: 24px;
+    }
+
+    .info-text,
+    .info-link {
+        font-size: 10px;
+    }
+
+    .info-footer,
+    .disclaimer-text,
+    .disclaimer-link {
+        font-size: 7px;
+    }
+
+    /* Gallery and place detail pages */
     .gallery-title {
         font-size: 2rem;
     }
@@ -1557,7 +1839,7 @@ body {
     .gallery-content,
     .place-detail-content {
         padding: 1rem;
-        padding-top: 90px;
+        padding-top: 75px;
         /* Adjusted for even smaller screens */
     }
 }
