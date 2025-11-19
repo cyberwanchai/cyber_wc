@@ -25,6 +25,20 @@ The temple features traditional Chinese architectural elements:
 - **Altar arrangements**: Following classical feng shui principles
 - **Carved woodwork**: Intricate designs depicting mythological scenes
 
+### 3D Model
+
+<model-viewer 
+    src="/assets/3d-models/temple-draco.glb" 
+    alt="3D model of Hung Shing Temple"
+    camera-controls 
+    auto-rotate
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    style="width: 100%; height: 500px;">
+</model-viewer>
+
+*Explore the temple's architecture in 3D. Use your mouse to rotate, scroll to zoom, and drag to pan.*
+
 ## Location and Access
 
 **Address**: Nos. 129-131 Queen's Road East, Wan Chai, Hong Kong

@@ -550,12 +550,17 @@ def update_map(
         geo_df_dynamic.drop_duplicates(subset='district').set_index('district')['code'].to_dict()
     )
 
-    # Set view_data once, then reuse it
-    view_data = mapview_data if mapview_data else district_viewdata
-
     # Case 1: District selected - show all places
     if selected_district:
         district_code = district_to_code_dynamic.get(selected_district)
+        # Prioritize district_viewdata (fresh centroid) over mapview_data (user pan/zoom)
+        # Check if district_viewdata has valid zoom/center data
+        if district_viewdata and 'zoom' in district_viewdata and 'center' in district_viewdata:
+            view_data = district_viewdata
+        elif mapview_data and 'zoom' in mapview_data and 'center' in mapview_data:
+            view_data = mapview_data
+        else:
+            view_data = {}
         return plot_interactive_district(
             place_data,
             geo_df_dynamic,

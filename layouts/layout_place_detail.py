@@ -165,6 +165,7 @@ def get_place_detail_layout(place_data, slug):
                     <html>
                     <head>
                         <meta charset="utf-8">
+                        <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
                         <style>
                             body {{
                                 font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -225,6 +226,13 @@ def get_place_detail_layout(place_data, slug):
                                 padding: 2em;
                                 text-align: center;
                                 color: #666;
+                            }}
+                            model-viewer {{
+                                width: 100%;
+                                height: 500px;
+                                margin: 2em 0;
+                                border-radius: 8px;
+                                background-color: #f0f0f0;
                             }}
                         </style>
                     </head>
