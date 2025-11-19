@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: cyberwc
+    env: python
+    buildCommand: uv sync
+    startCommand: uv run gunicorn cyber_wc_app:server --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PORT
+        value: 8050
