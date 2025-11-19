@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import geopandas as gpd
 import dash
@@ -661,4 +662,4 @@ def store_map_view_mainpage(relayout_data, selected_region, selected_district, e
 
 # For local development, debug=True
 if __name__ == '__main__':
-    app.run_server(host='0.0.0.0', port=8050, debug=True)
+    app.run_server(host='0.0.0.0', port=int(os.environ.get('PORT', 6969)), debug=False)
