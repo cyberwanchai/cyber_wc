@@ -102,7 +102,7 @@ uv run cyber_wc_app.py
 # uv creates a virtual environment automatically, but you can also run:
 source .venv/bin/activate  # On macOS/Linux
 # OR on Windows: .venv\Scripts\activate
-python michelin_app.py
+python cyber_wc_app.py
 ```
 
 The application will be available at `http://127.0.0.1:8050` or `http://localhost:8050`.

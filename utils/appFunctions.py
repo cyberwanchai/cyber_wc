@@ -15,7 +15,7 @@ from layouts.layout_main import (
 
 def plot_geometry_outline(fig, geometry, line_width=0.2):
     """
-    Draw the geographic boundary of a department, region, or arrondissement on a Plotly map.
+    Draw the geographic boundary of a district or region on a Plotly map.
 
     Parameters:
         fig (go.Figure): The Plotly figure to which the outline will be added.
@@ -175,15 +175,15 @@ def plot_region_center_view(region_df, region):
     return fig
 
 
-def get_street_details(row):
+def get_place_details(row):
     """
-    Generate an HTML Div containing detailed information about a street.
+    Generate an HTML Div containing detailed information about a place.
 
     Parameters:
-        row (pd.Series): Street information
+        row (pd.Series): Place information
 
     Returns:
-        details_layout (html.Div): Street details card
+        details_layout (html.Div): Place details card
     """
     try:
         name = row['name']
@@ -202,50 +202,50 @@ def get_street_details(row):
 
     place_slug = generate_slug(name)
 
-    # Simple border color for streets (reuse existing color)
+    # Simple border color for places (reuse existing color)
     border_color = '#640A64'
 
-    location_info = html.Span(f'{location}', className='restaurant-location')
+    location_info = html.Span(f'{location}', className='place-location')
 
     details_layout = html.Div(
         [
             html.Div(
                 [
                     html.Div(
-                        [html.Span(name, className='restaurant-name')],
+                        [html.Span(name, className='place-name')],
                         className='details-header',
                     ),
                     html.Div(
                         [
                             html.Span(
-                                f"{str(st_date) if pd.notna(st_date) and st_date!='' else ''}"
-                                f"{(' - ' + str(end_date)) if pd.notna(end_date) and end_date!='' else ''}",
-                                className='restaurant-cuisine',
+                                f'{str(st_date) if pd.notna(st_date) and st_date != "" else ""}'
+                                f'{(" - " + str(end_date)) if pd.notna(end_date) and end_date != "" else ""}',
+                                className='place-date',
                             )
                         ],
-                        className='details-cuisine',
+                        className='details-date',
                     ),
                     html.Div(
-                        [html.Span(f'{description}', className='restaurant-price')],
-                        className='details-price',
+                        [html.Span(f'{description}', className='place-description')],
+                        className='details-description',
                     ),
                     html.Div(
                         [
                             html.Span(
                                 f'{curr_condition}',
-                                className='restaurant-price',
+                                className='place-condition',
                                 style={'fontStyle': 'italic'},
                             )
                         ],
-                        className='details-price',
+                        className='details-condition',
                     ),
                 ],
-                className='restaurant-info',
+                className='place-info',
             ),
             html.Div(
                 [
                     html.Div(
-                        [html.Span(f'{address}', className='restaurant-address')],
+                        [html.Span(f'{address}', className='place-address')],
                         className='details-address',
                     ),
                     html.Div([location_info], className='details-location'),
@@ -257,14 +257,14 @@ def get_street_details(row):
                     html.A(
                         'Read Full Article',
                         href=f'/gallery/{place_slug}',
-                        className='restaurant-website',
+                        className='place-link',
                         style={'display': 'block', 'marginTop': '10px'},
                     )
                 ],
-                className='details-website',
+                className='details-link',
             ),
         ],
-        className='restaurant-details',
+        className='place-details',
         style={'borderColor': border_color},
     )
 
@@ -273,10 +273,10 @@ def get_street_details(row):
 
 def generate_hover_text(row):
     """
-    Generate HTML-formatted hover text for a restaurant.
+    Generate HTML-formatted hover text for a place.
 
     Parameters:
-        row (pd.Series or dict): A pandas Series or dictionary containing restaurant information.
+        row (pd.Series or dict): A pandas Series or dictionary containing place information.
 
     Returns:
         hover_text (str): An HTML-formatted string for hover text.
@@ -316,17 +316,16 @@ def label_properties(star):
 
 def add_star_trace(fig, subset, label_name, marker_size, marker_opacity, marker_color):
     """
-    Add a scatter marker layer to a Plotly map for a specific group of restaurants.
+    Add a scatter marker layer to a Plotly map for a specific group of places.
 
-    Each trace corresponds to a single star rating (e.g. 1★, Bib Gourmand, Selected)
-    and is styled with a consistent marker size, opacity, and colour. Hover text and
-    clickData are included for interactivity.
+    Each trace corresponds to a single condition category and is styled with a consistent
+    marker size, opacity, and colour. Hover text and clickData are included for interactivity.
 
     Parameters:
         fig (go.Figure): The Plotly figure to which the trace will be added.
-        subset (pd.DataFrame): Subset of restaurants sharing a specific star rating.
+        subset (pd.DataFrame): Subset of places sharing a specific condition.
         label_name (str): Label used in the legend and for identifying the trace.
-        marker_size (int): Marker size for the restaurant points.
+        marker_size (int): Marker size for the place points.
         marker_opacity (float): Opacity level for the markers.
         marker_color (str): Colour to apply to the markers (hex or CSS format).
     """
@@ -349,28 +348,27 @@ def add_star_trace(fig, subset, label_name, marker_size, marker_opacity, marker_
     )
 
 
-def plot_interactive_district(data_df, geo_df, department_code, selected_stars, zoom_data=None):
+def plot_interactive_district(data_df, geo_df, district_code, zoom_data=None):
     """
-    Plot an interactive map of a department, including restaurant points for selected star ratings.
+    Plot an interactive map of a district, including place points.
 
     Args:
-        data_df (pd.DataFrame): DataFrame containing restaurant data with 'department_num', 'stars', 'latitude', 'longitude', etc.
-        geo_df (GeoDataFrame): GeoDataFrame containing geometries of departments with 'code' and 'geometry'.
-        department_code (str or int): The code of the department to plot.
-        selected_stars (list): List of star ratings to include in the plot.
+        data_df (pd.DataFrame): DataFrame containing place data with 'district_num', 'latitude', 'longitude', etc.
+        geo_df (GeoDataFrame): GeoDataFrame containing geometries of districts with 'code' and 'geometry'.
+        district_code (str or int): The code of the district to plot.
         zoom_data (dict): Dictionary containing zoom level and center information.
 
     Returns:
-        fig (plotly.graph_objs.Figure): A Plotly Figure object with the department and restaurants plotted.
+        fig (plotly.graph_objs.Figure): A Plotly Figure object with the district and places plotted.
 
     Raises:
-        ValueError: If the specified department code is not found in geo_df.
+        ValueError: If the specified district code is not found in geo_df.
     """
     # Initialize zoom_data if not provided
     if zoom_data is None:
         zoom_data = {}
 
-    # Get the zoom and center from zoom_data or fallback to department defaults
+    # Get the zoom and center from zoom_data or fallback to district defaults
     zoom = zoom_data.get('zoom', 14.5)
     center_lat = zoom_data.get('center', {}).get('lat', None)
     center_lon = zoom_data.get('center', {}).get('lon', None)
@@ -379,24 +377,19 @@ def plot_interactive_district(data_df, geo_df, department_code, selected_stars, 
     fig = go.Figure()
     fig.update_layout(autosize=True)
 
-    # Get the specific geometry for the department
-    filtered_geo = geo_df[geo_df['code'] == str(department_code)]
+    # Get the specific geometry for the district
+    filtered_geo = geo_df[geo_df['code'] == str(district_code)]
     if filtered_geo.empty:
-        raise ValueError(
-            f"Department code '{department_code}' not found in the provided GeoDataFrame."
-        )
+        raise ValueError(f"District code '{district_code}' not found in the provided GeoDataFrame.")
 
     specific_geometry = filtered_geo['geometry'].iloc[0]
-    # Plot department boundaries
+    # Plot district boundaries
     plot_geometry_outline(fig, specific_geometry, line_width=1)
 
-    # Before filtering, inspect all restaurants in the department
-    all_in_dept = data_df[data_df['department_num'] == str(department_code)]
+    # Get all places in the district
+    dept_data = data_df[data_df['district_num'] == str(district_code)].copy()
 
-    # Now do star filtering
-    dept_data = all_in_dept[all_in_dept['stars'].isin(selected_stars)].copy()
-
-    # If dept_data is not empty, add restaurant points
+    # If dept_data is not empty, add place points
     if not dept_data.empty:
         dept_data['color'] = dept_data['curr_condition'].map(condition_color_map).fillna('#FFB84D')
         dept_data['hover_text'] = dept_data.apply(generate_hover_text, axis=1)
@@ -428,7 +421,7 @@ def plot_interactive_district(data_df, geo_df, department_code, selected_stars, 
             map_center_lat = center_lat
             map_center_lon = center_lon
     else:
-        # If no restaurant data, center based on geometry's centroid
+        # If no place data, center based on geometry's centroid
         centroid = specific_geometry.centroid
         map_center_lat = centroid.y
         map_center_lon = centroid.x

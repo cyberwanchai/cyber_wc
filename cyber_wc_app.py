@@ -18,51 +18,30 @@ from utils.markdownRenderer import get_all_place_slugs
 from utils.appFunctions import (
     plot_interactive_district,
     default_map_figure,
-    get_street_details,
+    get_place_details,
     plot_region_center_view,
 )
 
-# Load Hong Kong places data (renamed from hk_streets.csv)
+# Load Hong Kong places data
 all_streets = pd.read_csv('assets/Data/hk_places.csv')
-# Add dummy columns so existing plot functions work
-all_streets['stars'] = 1  # All streets shown as value 1
-all_streets['greenstar'] = 0  # No green stars for streets
 
 # Generate slug map for gallery routing
 slug_map = get_all_place_slugs(all_streets)
 # Create reverse mapping (slug -> place name)
 reverse_slug_map = {v: k for k, v in slug_map.items()}
 
-# Compatibility: functions expect 'department_num' like France; alias HK 'district_num'
-if 'department_num' not in all_streets.columns and 'district_num' in all_streets.columns:
-    all_streets['department_num'] = all_streets['district_num'].astype(str)
-else:
-    # Ensure it is a string for consistent comparisons
-    all_streets['department_num'] = all_streets['department_num'].astype(str)
+# Ensure district_num is a string for consistent comparisons
+all_streets['district_num'] = all_streets['district_num'].astype(str)
 
 # Load Hong Kong district GeoJSON data
 district_df = gpd.read_file('assets/Data/hk_districts.geojson')
-department_df = district_df  # Keep variable name for compatibility
 
 # Removed analysis-only datasets (region and wine) as part of cleanup
 
-
-# Create combined data function (kept for compatibility)
-def get_combined_restaurant_data(include_monaco=False):
-    return all_streets
-
-
-# Create geo dataframe function (kept for compatibility)
-def get_geo_df(include_monaco=False):
-    # For Hong Kong, expose all districts so the dropdown lists every district
-    return district_df
-
-
-# Get unique districts with streets
-districts_with_streets = all_streets['district_num'].unique()
-# Filter geo_df to only districts with street data
-geo_df = district_df[district_df['code'].isin(districts_with_streets)]
-star_placeholder = (0.5, 1, 2, 3)
+# Get unique districts with places
+districts_with_places = all_streets['district_num'].unique()
+# Filter geo_df to only districts with place data
+geo_df = district_df[district_df['code'].isin(districts_with_places)]
 
 
 # Use geo_df to get unique regions and districts for the initial dropdowns
@@ -70,8 +49,8 @@ star_placeholder = (0.5, 1, 2, 3)
 HK_REGIONS = ['Hong Kong Island', 'Kowloon', 'New Territories']
 unique_regions = [r for r in sorted(district_df['region'].unique()) if r in HK_REGIONS]
 initial_districts = geo_df[['district', 'code']].drop_duplicates().to_dict('records')
-initial_options = [{'label': f"{d['district']}", 'value': d['district']} for d in initial_districts]
-dept_to_code = (
+initial_options = [{'label': f'{d["district"]}', 'value': d['district']} for d in initial_districts]
+district_to_code = (
     district_df.drop_duplicates(subset='district').set_index('district')['code'].to_dict()
 )
 region_to_name = {region: region for region in unique_regions}
@@ -105,8 +84,8 @@ app.index_string = open('assets/custom_header.html', 'r').read()
 app.layout = html.Div(
     [
         dcc.Store(id='selected-stars', data=[]),
-        dcc.Store(id='available-stars', data=[]),  # will populate with star rating by department
-        dcc.Store(id='department-centroid-store', data={}),
+        dcc.Store(id='available-stars', data=[]),  # will populate with star rating by district
+        dcc.Store(id='district-centroid-store', data={}),
         dcc.Location(id='url', refresh=False),  # Tracks the url
         html.Div(id='page-content', children=get_main_layout()),  # Set initial content
     ]
@@ -223,7 +202,7 @@ def filter_gallery(selected_region, selected_status):
 # -----------------------> "Guide Page"
 
 
-# Get rid of the 'hand' when hovering over restaurants (doesn't work with Safari...)
+# Get rid of the 'hand' when hovering over places (doesn't work with Safari...)
 app.clientside_callback(
     """
     function(hoverData) {
@@ -249,7 +228,7 @@ app.clientside_callback(
         Output('matched-city-output-mainpage', 'children'),
         Output('matched-city-output-mainpage', 'className'),
         Output('region-dropdown', 'value'),
-        Output('department-dropdown', 'value'),
+        Output('district-dropdown', 'value'),
     ],
     [
         Input('info-toggle-button', 'n_clicks'),
@@ -327,17 +306,15 @@ def toggle_collapse_and_handle_search(
                 dash.no_update,
             )
 
-        # Add Monaco to dataset
-        plus_monaco = get_combined_restaurant_data(include_monaco=True)
-        matcher = LocationMatcher(plus_monaco)
-        result = matcher.find_region_department(city_input)
+        matcher = LocationMatcher(all_streets)
+        result = matcher.find_region_district(city_input)
         if isinstance(result, dict):
             # Valid result, update outputs
             city_details = [
                 html.P(
-                    f"Match:  {result.get('Matched Location', 'Unknown')},  "
-                    f"Region:  {result.get('Region', 'Unknown')},  "
-                    f"Department:  {result.get('Department', 'Unknown')}",
+                    f'Match:  {result.get("Matched Location", "Unknown")},  '
+                    f'Region:  {result.get("Region", "Unknown")},  '
+                    f'District:  {result.get("District", "Unknown")}',
                     className='match-details',
                 ),
             ]
@@ -347,7 +324,7 @@ def toggle_collapse_and_handle_search(
                 html.Div(city_details, className='city-match-container'),
                 'city-match-output-container-mainpage visible',
                 result.get('Region'),
-                result.get('Department'),
+                result.get('District'),
             )
         else:
             # No match found
@@ -357,7 +334,7 @@ def toggle_collapse_and_handle_search(
                 html.Div(
                     [
                         html.P(
-                            f"No match found. '{city_input}' is not represented in the Michelin Guide",
+                            f"No match found. '{city_input}' is not represented in our gallery.",
                             className='no-match-message',
                         )
                     ]
@@ -380,19 +357,19 @@ def toggle_collapse_and_handle_search(
 
 @app.callback(
     [
-        Output('department-dropdown', 'options'),
+        Output('district-dropdown', 'options'),
         Output('star-filter', 'children'),
         Output('star-filter', 'style'),
         Output('available-stars', 'data'),
     ],
     [
         Input('region-dropdown', 'value'),
-        Input('department-dropdown', 'value'),
+        Input('district-dropdown', 'value'),
     ],
 )
-def update_department_and_filters(selected_region, selected_department):
+def update_district_and_filters(selected_region, selected_district):
     # Use dynamic geo_df for HK districts
-    geo_df_dynamic = get_geo_df()
+    geo_df_dynamic = district_df
 
     # Fetch district options based on the selected region.
     districts = (
@@ -400,10 +377,10 @@ def update_department_and_filters(selected_region, selected_department):
         .drop_duplicates()
         .to_dict('records')
     )
-    district_options = [{'label': f"{d['district']}", 'value': d['district']} for d in districts]
+    district_options = [{'label': f'{d["district"]}', 'value': d['district']} for d in districts]
 
-    # Streets don't have star ratings, so always hide star filter
-    # Return a placeholder list with all streets visible
+    # Places don't have star ratings, so always hide star filter
+    # Return a placeholder list with all places visible
     available_stars = []
 
     return district_options, [], {'display': 'none'}, available_stars
@@ -498,31 +475,31 @@ def update_button_active_state(
 
 
 @app.callback(
-    Output('restaurant-details', 'children'),
+    Output('place-details', 'children'),
     [
         Input('map-display', 'clickData'),
-        Input('department-dropdown', 'value'),
+        Input('district-dropdown', 'value'),
         Input('region-dropdown', 'value'),
         Input('selected-stars', 'data'),
     ],
 )
-def update_sidebar(clickData, selected_department, selected_region, selected_stars):
+def update_sidebar(clickData, selected_district, selected_region, selected_stars):
     ctx = dash.callback_context
 
     # Placeholder messages
-    street_placeholder = html.Div(
-        'Select a street on the map to see more details', className='placeholder-text'
+    place_placeholder = html.Div(
+        'Select a place on the map to see more details', className='placeholder-text'
     )
 
     select_district_placeholder = html.Div(
-        'Select a district to view streets.', className='placeholder-text'
+        'Select a district to view places.', className='placeholder-text'
     )
 
-    # If no department is selected, prompt the user
-    if not selected_department:
+    # If no district is selected, prompt the user
+    if not selected_district:
         return select_district_placeholder
 
-    # Get street data (no Monaco equivalent for HK)
+    # Get place data
     combined_data = all_streets
 
     # Determine which input triggered the callback
@@ -532,61 +509,58 @@ def update_sidebar(clickData, selected_department, selected_region, selected_sta
     if triggered_id == 'map-display':
         if clickData and 'points' in clickData and len(clickData['points']) > 0:
             point = clickData['points'][0]
-            street_index = point.get('meta') or point.get('customdata')
+            place_index = point.get('meta') or point.get('customdata')
 
-            if street_index in combined_data.index:
-                street_info = combined_data.loc[street_index]
-                # Streets don't have star filtering, always show
-                return get_street_details(street_info)
-        return street_placeholder
+            if place_index in combined_data.index:
+                place_info = combined_data.loc[place_index]
+                # Places don't have star filtering, always show
+                return get_place_details(place_info)
+        return place_placeholder
 
-    # For any other triggers, clear the street details
-    return street_placeholder
+    # For any other triggers, clear the place details
+    return place_placeholder
 
 
 @app.callback(
     Output('map-display', 'figure'),
     [
-        Input('department-dropdown', 'value'),
+        Input('district-dropdown', 'value'),
         Input('region-dropdown', 'value'),
         Input('selected-stars', 'data'),
     ],
     [
         State('map-view-store-mainpage', 'data'),
-        State('department-centroid-store', 'data'),
+        State('district-centroid-store', 'data'),
     ],
 )
 def update_map(
-    selected_department,
+    selected_district,
     selected_region,
     selected_stars,
     mapview_data,
-    dept_viewdata,
+    district_viewdata,
 ):
     ctx = callback_context
     triggered_id, _ = ctx.triggered[0]['prop_id'].split('.') if ctx.triggered else (None, None)
 
-    # Use HK street data
-    street_data = all_streets
-    geo_df_dynamic = get_geo_df()
-    dept_to_code_dynamic = (
+    # Use HK place data
+    place_data = all_streets
+    geo_df_dynamic = district_df
+    district_to_code_dynamic = (
         geo_df_dynamic.drop_duplicates(subset='district').set_index('district')['code'].to_dict()
     )
 
     # Set view_data once, then reuse it
-    view_data = mapview_data if mapview_data else dept_viewdata
+    view_data = mapview_data if mapview_data else district_viewdata
 
-    # Case 1: District selected - show all streets (no star filtering)
-    if selected_department:
-        district_code = dept_to_code_dynamic.get(selected_department)
-        # For streets, we show all of them (no star filtering needed)
-        # Just use a placeholder to show all streets
+    # Case 1: District selected - show all places
+    if selected_district:
+        district_code = district_to_code_dynamic.get(selected_district)
         return plot_interactive_district(
-            street_data,
+            place_data,
             geo_df_dynamic,
             district_code,
-            [1],
-            view_data,  # Dummy star value
+            view_data,
         )
 
     # Case 2: Handle region selection - center only (no outlines)
@@ -601,21 +575,21 @@ def update_map(
 
 
 @app.callback(
-    Output('department-centroid-store', 'data'),
-    [Input('department-dropdown', 'value'), Input('region-dropdown', 'value')],
+    Output('district-centroid-store', 'data'),
+    [Input('district-dropdown', 'value'), Input('region-dropdown', 'value')],
 )
-def calculate_department_centroid(selected_department, selected_region):
-    if not selected_department:
+def calculate_district_centroid(selected_district, selected_region):
+    if not selected_district:
         return {}
 
     # Get HK districts geo data
-    geo_df_dynamic = get_geo_df()
+    geo_df_dynamic = district_df
 
     # Generate district_to_code dynamically
-    dept_to_code_dynamic = (
+    district_to_code_dynamic = (
         geo_df_dynamic.drop_duplicates(subset='district').set_index('district')['code'].to_dict()
     )
-    district_code = dept_to_code_dynamic.get(selected_department)
+    district_code = district_to_code_dynamic.get(selected_district)
 
     if not district_code:
         return {}
@@ -638,20 +612,20 @@ def calculate_department_centroid(selected_department, selected_region):
     [
         Input('map-display', 'relayoutData'),
         Input('region-dropdown', 'value'),
-        Input('department-dropdown', 'value'),
+        Input('district-dropdown', 'value'),
     ],
     [State('map-view-store-mainpage', 'data')],
 )
-def store_map_view_mainpage(relayout_data, selected_region, selected_department, existing_data):
+def store_map_view_mainpage(relayout_data, selected_region, selected_district, existing_data):
     # Initialize existing_data if it's None
     if existing_data is None:
         existing_data = {}
 
-    # Reset zoom data when region or department changes
+    # Reset zoom data when region or district changes
     ctx = dash.callback_context
     triggered_input = ctx.triggered[0]['prop_id'].split('.')[0] if ctx.triggered else None
 
-    if triggered_input in ['region-dropdown', 'department-dropdown']:
+    if triggered_input in ['region-dropdown', 'district-dropdown']:
         return {}
 
     # If relayoutData is None or empty, do not update the store

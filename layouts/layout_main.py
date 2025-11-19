@@ -15,9 +15,9 @@ star_placeholder = (0.25, 0.5, 1, 2, 3)
 unique_regions = ['Hong Kong Island', 'Kowloon', 'New Territories']
 
 
-# Inverted michelin images
+# Inverted star images (legacy - used in hidden star filter)
 def inverted_michelin_stars(count):
-    # Returns a list of Michelin star image components each with inverted colors
+    # Returns a list of star image components each with inverted colors
     return [
         html.Img(
             src='assets/Images/Michelin_star.png',
@@ -159,11 +159,11 @@ def get_footer():
                             html.Div(
                                 children=[
                                     html.Span(
-                                        'The Michelin Guide to France was built from this ',
+                                        'This project was built from ',
                                         className='info-text',
                                     ),
                                     dcc.Link(
-                                        'GitHub Repository',
+                                        'this GitHub Repository',
                                         href='https://github.com/pineapple-bois/Michelin_Rated_Restaurants',
                                         target='_blank',
                                         className='info-link',
@@ -176,14 +176,8 @@ def get_footer():
                                 children=[
                                     html.Span('© pineapple-bois 2024', className='info-footer'),
                                     html.Span(
-                                        ' | This website is an independent project and is not affiliated with or endorsed by ',
+                                        ' | This website is an independent project showcasing historic Hong Kong places.',
                                         className='disclaimer-text',
-                                    ),
-                                    dcc.Link(
-                                        'the official Michelin Guide',
-                                        href='https://guide.michelin.com/en/fr/restaurants',
-                                        target='_blank',
-                                        className='disclaimer-link',
                                     ),
                                 ],
                                 className='footer-inline',
@@ -245,8 +239,8 @@ def star_filter_section(available_stars=star_placeholder):
     def hidden_toggle_button():
         return html.Button('', id='toggle-selected-btn', n_clicks=1, style={'display': 'none'})
 
-    # Shared layout title
-    title = html.H6('Filter by Michelin Rating', className='star-select-title')
+    # Shared layout title (filter is hidden but title remains for consistency)
+    title = html.H6('Filter by Rating', className='star-select-title')
 
     # Case 1: inline (fits in same row)
     if has_selected and 1 <= len(standard_stars) <= 3:
@@ -377,7 +371,7 @@ def get_main_content_with_city_match(unique_regions):
                     html.Div(
                         [
                             html.H6('Select a District', className='dropdown-title'),
-                            dcc.Dropdown(id='department-dropdown', className='dropdown-style'),
+                            dcc.Dropdown(id='district-dropdown', className='dropdown-style'),
                         ],
                         className='dropdown-block',
                     ),
@@ -397,12 +391,12 @@ def get_main_content_with_city_match(unique_regions):
                     # ),
                     # dcc.Store(id='show-selected-toggle', data='none'),
                     html.Div(
-                        id='restaurant-details',
+                        id='place-details',
                         children=[],
-                        className='restaurant-details-container',
+                        className='place-details-container',
                     ),
                 ],
-                className='star-ratings-and-details-container',
+                className='filters-and-details-container',
             ),
         ],
         className='sidebar-container',

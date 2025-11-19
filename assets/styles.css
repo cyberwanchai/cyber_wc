@@ -92,7 +92,7 @@ body {
 .bar {
     height: 3px;
     background-color: #C2282D;
-    /* Michelin Red */
+    /* Primary red color */
     border-radius: 2px;
 }
 
@@ -554,7 +554,7 @@ body {
 .instructions-container,
 .dropdown-container,
 .ratings-container,
-.restaurant-details-container {
+.place-details-container {
     padding: 0;
     /* Remove padding */
     background-color: white;
@@ -598,18 +598,6 @@ body {
     margin-bottom: 0;
 }
 
-.hidden-paris-section {
-    height: 0;
-    overflow: hidden;
-    transition: height 0.3s ease-in-out;
-}
-
-.visible-paris-section {
-    height: auto;
-    /* Allows the content to define the height */
-    overflow: visible;
-    transition: height 0.3s ease-in-out;
-}
 
 /* -------------------------
    Star selection Styles
@@ -720,10 +708,10 @@ body {
 }
 
 /* -------------------------
-   Restaurant Details Styles
+   Place Details Styles
    ------------------------- */
 
-.restaurant-details {
+.place-details {
     background-color: white;
     padding: 15px;
     border-radius: 8px;
@@ -741,7 +729,7 @@ body {
     text-align: center;
 }
 
-.restaurant-details-container {
+.place-details-container {
     margin-top: 20px;
 }
 
@@ -752,7 +740,7 @@ body {
     justify-content: space-between;
 }
 
-.restaurant-name {
+.place-name {
     font-size: 18px;
     /* Larger text for the name */
     font-weight: 700;
@@ -761,21 +749,29 @@ body {
     /* Space between name and stars */
 }
 
-.restaurant-stars {
+.place-stars {
     display: flex;
     /* Align star images in a row */
     flex-wrap: nowrap;
     /* Prevent stars from wrapping to the next line */
 }
 
-/* Styling for the cuisine and price */
-.details-cuisine,
-.details-price {
+/* Styling for the date, description, and condition */
+.details-date,
+.details-description,
+.details-condition {
     font-size: 12px;
     /* Slightly larger text for key details */
 }
 
-.restaurant-info {
+.place-date,
+.place-description,
+.place-condition {
+    font-size: 12px;
+    /* Text styling for place date, description, and condition */
+}
+
+.place-info {
     margin-bottom: 10px;
 }
 
@@ -787,8 +783,19 @@ body {
     /* Space above address and location */
 }
 
-/* Link styling for the website */
-.restaurant-website {
+.place-address,
+.place-location {
+    font-size: 12px;
+    /* Text styling for place address and location */
+}
+
+.details-link {
+    margin-top: 10px;
+    /* Space above the link section */
+}
+
+/* Link styling for the article link */
+.place-link {
     font-size: 12px;
     display: block;
     /* Ensures the link is on a new line */
@@ -800,7 +807,7 @@ body {
     /* Bold for emphasis */
 }
 
-.restaurant-website:hover {
+.place-link:hover {
     text-decoration: underline;
     /* Underline on hover for clarity */
 }
@@ -849,7 +856,7 @@ body {
         font-size: 20px;
     }
 
-    .restaurant-name {
+    .place-name {
         font-size: 16px;
     }
 }
@@ -1020,12 +1027,6 @@ body {
         z-index: 1000;
     }
 
-    .visible-paris-section {
-        flex-grow: 2;
-        min-width: 200px;
-        /* Ensure dropdown blocks have a minimum width */
-        max-width: 33%;
-    }
 
     /* Adjustments for dropdown styling */
     .dropdown-style {
@@ -1048,14 +1049,14 @@ body {
         /* Expand to the full width of the dropdown */
     }
 
-    /* Flexbox container for star ratings and restaurant details */
-    .star-ratings-and-details-container {
+    /* Flexbox container for filters and place details */
+    .filters-and-details-container {
         flex-grow: 0;
         display: flex;
         flex-direction: row;
         /* Place items in a row (side by side) */
         gap: 20px;
-        /* Adjust gap between the star ratings and restaurant details */
+        /* Adjust gap between the filters and place details */
         margin-bottom: 0;
     }
 
@@ -1069,8 +1070,8 @@ body {
         margin-bottom: 0;
     }
 
-    /* Restaurant details section takes up the other 50% of the width */
-    .restaurant-details-container {
+    /* Place details section takes up the other 50% of the width */
+    .place-details-container {
         /*background-color: lightcoral;*/
         flex-grow: 1;
         /* This ensures it takes up available space */
@@ -1103,16 +1104,6 @@ body {
         padding-left: 30px;
     }
 
-    .michelin-title-paragraph {
-        margin-bottom: 20px;
-        font-size: 16px;
-    }
-
-    .michelin-text-container {
-        width: calc(100% - 30px);
-    }
-
-
     .region-content-wrapper {
         padding-right: 30px;
     }
@@ -1121,20 +1112,8 @@ body {
         font-size: 16px;
     }
 
-    .department-content-wrapper {
-        padding-right: 30px;
-    }
-
-    .department-description {
-        font-size: 16px;
-    }
-
     .visible-section {
         padding-right: 30px;
-    }
-
-    .arrondissement-description {
-        font-size: 16px;
     }
 
     .ranking-content-wrapper {
