@@ -2,7 +2,7 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 
 
-color_map = {0.25: '#808080', 0.5: '#640A64', 1: '#FFB84D', 2: '#FE6F64', 3: '#C2282D'}
+color_map = {0.25: '#808080', 0.5: '#B40505', 1: '#FFB84D', 2: '#FE6F64', 3: '#C2282D'}
 
 condition_color_map = {
     'In use': '#689c44',
@@ -455,5 +455,5 @@ def get_main_layout():
 
     body = html.Div(children=[get_main_content_with_city_match(unique_regions)], className='body')
 
-    # Combine all sections into the main layout
+    # Chat widget moved to root app.layout for persistence across page navigation
     return html.Div([header, body], className='main-layout')

@@ -14,6 +14,7 @@ Cyber Wan Chai is an interactive web application that showcases historical photo
 - **Photo Galleries**: View curated collections of historical photographs
 - **Location Stories**: Read detailed articles about Hong Kong's streets and landmarks
 - **Region Navigation**: Browse by districts and specific areas
+- **AI Chat Assistant**: Ask questions about Hong Kong's history and historic places (requires DeepSeek API key)
 - **Responsive Design**: Optimized for desktop and mobile viewing
 
 ----

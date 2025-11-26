@@ -5,6 +5,7 @@ Shows all historic Hong Kong places in a card grid format
 
 from dash import html, dcc
 from .layout_main import get_header_with_buttons, condition_color_map
+from .layout_chat import get_chat_widget
 
 
 def create_place_card(place_data, slug):
@@ -196,11 +197,15 @@ def get_gallery_layout(places_df, slug_map):
         className='gallery-content',
     )
 
+    # Chat widget
+    chat_widget = get_chat_widget()
+
     # Complete layout
     return html.Div(
         [
             header,
             gallery_content,
+            chat_widget,
         ],
         className='gallery-layout',
     )

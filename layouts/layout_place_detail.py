@@ -6,6 +6,7 @@ Shows individual place article with markdown content
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 from .layout_main import get_header_with_buttons, get_footer, condition_color_map
+from .layout_chat import get_chat_widget
 from utils.markdownRenderer import render_markdown_file
 
 
@@ -141,7 +142,7 @@ def get_place_detail_layout(place_data, slug):
                         [
                             html.Strong('🔗 External Link:', className='metadata-label'),
                             html.A(
-                                ' Wikipedia', href=url, target='_blank', className='metadata-link'
+                                'Wikipedia', href=url, target='_blank', className='metadata-link'
                             ),
                         ],
                         className='metadata-item',
@@ -175,21 +176,21 @@ def get_place_detail_layout(place_data, slug):
                                 padding: 20px;
                             }}
                             h1, h2, h3, h4 {{ 
-                                color: #640A64; 
+                                color: #B40505; 
                                 margin-top: 1.5em;
                                 margin-bottom: 0.5em;
                             }}
-                            h1 {{ font-size: 2em; border-bottom: 2px solid #640A64; padding-bottom: 0.3em; }}
+                            h1 {{ font-size: 2em; border-bottom: 2px solid #B40505; padding-bottom: 0.3em; }}
                             h2 {{ font-size: 1.6em; border-bottom: 1px solid #ddd; padding-bottom: 0.2em; }}
                             h3 {{ font-size: 1.3em; }}
                             p {{ margin: 1em 0; }}
                             ul, ol {{ margin: 1em 0; padding-left: 2em; }}
                             li {{ margin: 0.5em 0; }}
-                            strong {{ color: #640A64; }}
-                            a {{ color: #640A64; text-decoration: none; border-bottom: 1px solid #640A64; }}
-                            a:hover {{ color: #FFB84D; border-bottom-color: #FFB84D; }}
+                            strong {{ color: #B40505; }}
+                            a {{ color: #0056b3; text-decoration: none; border-bottom: 1px solid #0056b3; }}
+                            a:hover {{ text-decoration: underline; border-bottom-color: #0056b3; }}
                             blockquote {{
-                                border-left: 4px solid #640A64;
+                                border-left: 4px solid #B40505;
                                 margin: 1.5em 0;
                                 padding: 0.5em 1em;
                                 background: #f9f9f9;
@@ -218,7 +219,7 @@ def get_place_detail_layout(place_data, slug):
                                 text-align: left;
                             }}
                             th {{
-                                background: #640A64;
+                                background: #B40505;
                                 color: white;
                             }}
                             tr:nth-child(even) {{ background: #f9f9f9; }}
@@ -263,6 +264,9 @@ def get_place_detail_layout(place_data, slug):
     # Footer
     # footer = get_footer()
 
+    # Chat widget
+    chat_widget = get_chat_widget()
+
     # Complete layout
     return html.Div(
         [
@@ -279,6 +283,7 @@ def get_place_detail_layout(place_data, slug):
                 className='place-detail-content',
             ),
             # footer,
+            chat_widget,
         ],
         className='place-detail-layout',
     )
