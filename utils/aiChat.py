@@ -69,7 +69,7 @@ def get_ai_response(user_message: str, conversation_history: list = None) -> dic
         response = client.chat.completions.create(
             model=DEEPSEEK_MODEL,
             messages=messages,
-            temperature=0.7,
+            temperature=1.0,
             max_tokens=1000
         )
         
