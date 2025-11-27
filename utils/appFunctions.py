@@ -205,7 +205,7 @@ def get_place_details(row):
     place_slug = generate_slug(name)
 
     # Simple border color for places (reuse existing color)
-    border_color = '#640A64'
+    border_color = '#B40505'
 
     location_info = html.Span(f'{location}', className='place-location')
 

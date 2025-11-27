@@ -13,6 +13,7 @@ from layouts.layout_main import get_main_layout, color_map
 from layouts.layout_gallery import get_gallery_layout
 from layouts.layout_place_detail import get_place_detail_layout
 from layouts.layout_404 import get_404_layout
+from layouts.layout_chat import get_chat_widget
 
 from utils.locationMatcher import LocationMatcher
 from utils.markdownRenderer import get_all_place_slugs
@@ -22,6 +23,7 @@ from utils.appFunctions import (
     get_place_details,
     plot_region_center_view,
 )
+from utils.aiChat import get_ai_response
 
 # Load Hong Kong places data
 all_streets = pd.read_csv('assets/Data/hk_places.csv')
@@ -87,8 +89,17 @@ app.layout = html.Div(
         dcc.Store(id='selected-stars', data=[]),
         dcc.Store(id='available-stars', data=[]),  # will populate with star rating by district
         dcc.Store(id='district-centroid-store', data={}),
+        # Chat stores at root level for persistence across page navigation
+        dcc.Store(id='chat-conversation-store', data=[]),
+        dcc.Store(id='chat-is-open-store', data=False),
+        dcc.Store(id='chat-scroll-trigger', data=0),
+        dcc.Store(id='chat-pending-message-store', data=None),  # Triggers AI callback
         dcc.Location(id='url', refresh=False),  # Tracks the url
         html.Div(id='page-content', children=get_main_layout()),  # Set initial content
+        get_chat_widget(),  # Chat widget as sibling of page-content for persistence
+        html.Div(
+            id='dummy-output', style={'display': 'none'}
+        ),  # Hidden dummy output for clientside callback
     ]
 )
 
@@ -212,6 +223,7 @@ app.clientside_callback(
         } else {
             document.getElementById('map-display').style.cursor = 'default';
         }
+        return null;
     }
     """,
     Output('dummy-output', 'children'),
@@ -660,6 +672,259 @@ def store_map_view_mainpage(relayout_data, selected_region, selected_district, e
     raise dash.exceptions.PreventUpdate
 
 
+# -----------------------> "Chat Widget"
+
+
+@app.callback(
+    [
+        Output('chat-window', 'style'),
+        Output('chat-toggle-button', 'style'),
+        Output('chat-is-open-store', 'data'),
+    ],
+    [
+        Input('chat-toggle-button', 'n_clicks'),
+        Input('chat-close-button', 'n_clicks'),
+    ],
+    [State('chat-is-open-store', 'data')],
+)
+def toggle_chat_window(toggle_clicks, close_clicks, is_open):
+    """Toggle chat window open/closed."""
+    ctx = callback_context
+    if not ctx.triggered:
+        # Initial state: closed
+        return (
+            {'display': 'none'},
+            {'display': 'flex'},
+            False,
+        )
+
+    trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    if trigger_id == 'chat-toggle-button':
+        # Toggle button clicked - open chat
+        return (
+            {'display': 'flex'},
+            {'display': 'none'},
+            True,
+        )
+    elif trigger_id == 'chat-close-button':
+        # Close button clicked - close chat
+        return (
+            {'display': 'none'},
+            {'display': 'flex'},
+            False,
+        )
+
+    # Default: no change
+    raise PreventUpdate
+
+
+def create_thinking_indicator():
+    """Create animated thinking dots indicator."""
+    return html.Div(
+        [
+            html.Div(
+                [
+                    html.Div(
+                        [
+                            html.Span(),
+                            html.Span(),
+                            html.Span(),
+                        ],
+                        className='chat-thinking-dots',
+                    )
+                ],
+                className='chat-message chat-message-assistant chat-message-thinking',
+            )
+        ],
+        className='chat-message-wrapper',
+    )
+
+
+def build_message_components(conversation_history):
+    """Build message components from conversation history."""
+    message_components = []
+    for msg in conversation_history:
+        role = msg.get('role', 'user')
+        content = msg.get('content', '')
+        message_class = 'chat-message-user' if role == 'user' else 'chat-message-assistant'
+        message_components.append(
+            html.Div(
+                [html.P(content, className=f'chat-message {message_class}')],
+                className='chat-message-wrapper',
+            )
+        )
+    return message_components
+
+
+@app.callback(
+    [
+        Output('chat-messages-container', 'children'),
+        Output('chat-input', 'value'),
+        Output('chat-pending-message-store', 'data'),
+        Output('chat-conversation-store', 'data', allow_duplicate=True),
+    ],
+    [
+        Input('chat-send-button', 'n_clicks'),
+        Input('chat-clear-button', 'n_clicks'),
+        Input('chat-input', 'n_submit'),  # Enter key support
+    ],
+    [
+        State('chat-input', 'value'),
+        State('chat-conversation-store', 'data'),
+    ],
+    prevent_initial_call=True,
+)
+def handle_chat_send(send_clicks, clear_clicks, enter_submit, input_value, conversation_history):
+    """Handle sending chat messages - shows user message immediately with thinking indicator."""
+    ctx = callback_context
+
+    if not ctx.triggered:
+        raise PreventUpdate
+
+    trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    # Handle clear button
+    if trigger_id == 'chat-clear-button':
+        welcome_message = html.Div(
+            [
+                html.Div(
+                    [
+                        html.P(
+                            "Chat cleared. How can I help you learn about Hong Kong's history?",
+                            className='chat-message chat-message-assistant',
+                        )
+                    ],
+                    className='chat-message-wrapper',
+                )
+            ]
+        )
+        return welcome_message, '', None, []
+
+    # Handle send button or Enter key
+    if trigger_id in ['chat-send-button', 'chat-input']:
+        if not input_value or not input_value.strip():
+            raise PreventUpdate
+
+        # Initialize conversation history if needed
+        if conversation_history is None:
+            conversation_history = []
+
+        user_message = input_value.strip()
+
+        # Build message components with existing messages + new user message
+        message_components = build_message_components(conversation_history)
+
+        # Add current user message
+        message_components.append(
+            html.Div(
+                [html.P(user_message, className='chat-message chat-message-user')],
+                className='chat-message-wrapper',
+            )
+        )
+
+        # Add thinking indicator
+        message_components.append(create_thinking_indicator())
+
+        # Update conversation history with user message
+        updated_history = conversation_history + [{'role': 'user', 'content': user_message}]
+
+        # Return immediately with user message + thinking indicator
+        # Store user message to trigger AI callback
+        return (
+            html.Div(message_components, id='chat-messages-list'),
+            '',  # Clear input
+            user_message,  # Store message to trigger AI callback
+            updated_history,  # Update history with user message
+        )
+
+    raise PreventUpdate
+
+
+@app.callback(
+    [
+        Output('chat-messages-container', 'children', allow_duplicate=True),
+        Output('chat-conversation-store', 'data'),
+        Output('chat-pending-message-store', 'data', allow_duplicate=True),
+    ],
+    [Input('chat-pending-message-store', 'data')],
+    [State('chat-conversation-store', 'data')],
+    prevent_initial_call=True,
+)
+def handle_ai_response(pending_message, conversation_history):
+    """Handle AI response - triggered when pending message is set."""
+    if not pending_message:
+        raise PreventUpdate
+
+    # Initialize conversation history if needed
+    if conversation_history is None:
+        conversation_history = []
+
+    # Get AI response
+    ai_response = get_ai_response(pending_message, conversation_history)
+
+    # Build message components (without thinking indicator)
+    message_components = build_message_components(conversation_history)
+
+    if ai_response['success']:
+        # Add AI response to history
+        updated_history = conversation_history + [
+            {'role': 'assistant', 'content': ai_response['message']}
+        ]
+        # Add AI message to display
+        message_components.append(
+            html.Div(
+                [
+                    html.P(
+                        ai_response['message'],
+                        className='chat-message chat-message-assistant',
+                    )
+                ],
+                className='chat-message-wrapper',
+            )
+        )
+    else:
+        # Show error message but don't add to history
+        updated_history = conversation_history
+        message_components.append(
+            html.Div(
+                [
+                    html.P(
+                        ai_response['message'],
+                        className='chat-message chat-message-error',
+                    )
+                ],
+                className='chat-message-wrapper',
+            )
+        )
+
+    return (
+        html.Div(message_components, id='chat-messages-list'),
+        updated_history,
+        None,  # Clear pending message
+    )
+
+
+# Auto-scroll chat messages to bottom
+app.clientside_callback(
+    """
+    function(children) {
+        if (children) {
+            const container = document.getElementById('chat-messages-container');
+            if (container) {
+                setTimeout(function() {
+                    container.scrollTop = container.scrollHeight;
+                }, 100);
+            }
+        }
+        return 0;
+    }
+    """,
+    Output('chat-scroll-trigger', 'data'),
+    Input('chat-messages-container', 'children'),
+)
+
+
 # For local development, debug=True
 if __name__ == '__main__':
-    app.run_server(host='0.0.0.0', port=int(os.environ.get('PORT', 6969)), debug=False)
+    app.run_server(host='0.0.0.0', port=int(os.environ.get('PORT', 6969)), debug=True)
