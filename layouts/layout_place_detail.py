@@ -4,9 +4,7 @@ Shows individual place article with markdown content
 """
 
 from dash import html, dcc
-import dash_bootstrap_components as dbc
 from .layout_main import get_header_with_buttons, get_footer, condition_color_map
-from .layout_chat import get_chat_widget
 from utils.markdownRenderer import render_markdown_file
 
 
@@ -264,10 +262,8 @@ def get_place_detail_layout(place_data, slug):
     # Footer
     # footer = get_footer()
 
-    # Chat widget
-    chat_widget = get_chat_widget()
-
     # Complete layout
+    # Note: Chat widget is included at root level in app.layout for persistence
     return html.Div(
         [
             header,
@@ -283,7 +279,6 @@ def get_place_detail_layout(place_data, slug):
                 className='place-detail-content',
             ),
             # footer,
-            chat_widget,
         ],
         className='place-detail-layout',
     )

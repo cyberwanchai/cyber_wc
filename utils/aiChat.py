@@ -21,7 +21,10 @@ You help users explore and learn about Hong Kong's rich heritage, including:
 - Local stories and memories
 
 Be conversational, informative, and engaging. If you don't know something specific, acknowledge it and provide general context when possible.
-Always respond in a friendly and helpful manner."""
+Always respond in a friendly and helpful manner.
+
+Answer in the same language as the user use, particularly English or Chinese.
+"""
 
 
 def get_ai_response(user_message: str, conversation_history: list = None) -> dict:
