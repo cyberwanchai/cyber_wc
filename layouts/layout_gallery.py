@@ -36,6 +36,8 @@ def create_place_card(place_data, slug):
             date_range += f' - {end_date}'
 
     # Truncate description for card view
+    if not isinstance(description, str):
+        description = ''
     short_description = description[:150] + '...' if len(description) > 150 else description
 
     card = html.Div(

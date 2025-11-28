@@ -4,6 +4,21 @@
 
 The Hung Shing Temple at Nos. 129-131 Queen's Road East is a historic temple dedicated to Hung Shing Tai Wong, a deity revered by fishermen and seafarers. Built in **1847**, this temple represents an important example of traditional Chinese religious architecture in Hong Kong.
 
+<model-viewer 
+    src="/assets/3d-models/temple-draco.glb" 
+    alt="3D model of Hung Shing Temple"
+    camera-controls 
+    auto-rotate
+    shadow-intensity="1"
+    shadow-softness="1"
+    touch-action="pan-y"
+    environment-image="neutral"
+    tone-mapping="aces"
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    style="width: 100%; height: 500px; background-color: #f0f0f0; border-radius: 8px;">
+</model-viewer>
+
 ## Hung Shing Deity
 
 Hung Shing Temples, also known as Tai Wong Temples, are dedicated to Hung Shing Tai Wong. These temples have been widely built throughout southern China, especially in Guangdong province and Hong Kong, reflecting the maritime culture of the region.
@@ -24,20 +39,6 @@ The temple features traditional Chinese architectural elements:
 - **Incense burners**: Traditional bronze vessels for worship
 - **Altar arrangements**: Following classical feng shui principles
 - **Carved woodwork**: Intricate designs depicting mythological scenes
-
-### 3D Model
-
-<model-viewer 
-    src="/assets/3d-models/temple-draco.glb" 
-    alt="3D model of Hung Shing Temple"
-    camera-controls 
-    auto-rotate
-    ar
-    ar-modes="webxr scene-viewer quick-look"
-    style="width: 100%; height: 500px;">
-</model-viewer>
-
-*Explore the temple's architecture in 3D. Use your mouse to rotate, scroll to zoom, and drag to pan.*
 
 ## Location and Access
 

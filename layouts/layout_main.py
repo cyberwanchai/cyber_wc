@@ -15,33 +15,6 @@ star_placeholder = (0.25, 0.5, 1, 2, 3)
 unique_regions = ['Hong Kong Island', 'Kowloon', 'New Territories']
 
 
-# Inverted star images (legacy - used in hidden star filter)
-def inverted_michelin_stars(count):
-    # Returns a list of star image components each with inverted colors
-    return [
-        html.Img(
-            src='assets/Images/Michelin_star.png',
-            className='michelin-star-invert',
-            style={
-                'width': '16px',
-                'vertical-align': 'middle',
-                'margin-right': '2px',
-                'filter': 'brightness(0) invert(1)',
-            },
-        )
-        for _ in range(int(count))
-    ]
-
-
-def inverted_bib_gourmand():
-    # Returns the Bib Gourmand image component with inverted colors
-    return html.Img(
-        src='assets/Images/Michelin_Bib.png',
-        className='bib-image-invert',
-        style={'width': '18px', 'vertical-align': 'middle', 'filter': 'brightness(0) invert(1)'},
-    )
-
-
 def get_header_with_buttons():
     return html.Div(
         children=[
@@ -72,8 +45,8 @@ def get_header_with_buttons():
                 id='navigation-menu',
                 className='nav-dropdown',
                 children=[
-                    html.A('Explore', href='/', id='home-button', className='nav-link'),
-                    html.A('Gallery', href='/gallery', id='gallery-button', className='nav-link'),
+                    dcc.Link('Explore', href='/', id='home-button', className='nav-link'),
+                    dcc.Link('Gallery', href='/gallery', id='gallery-button', className='nav-link'),
                 ],
             ),
         ],
@@ -193,135 +166,10 @@ def get_footer():
     )
 
 
-# Define the row with buttons logic as functions
-def create_star_button(value, label, type_name='filter-button-mainpage'):
-    # Generate color with reduced opacity for active state
-    normal_bg_color = color_map[value]
-    return dbc.Button(
-        label,
-        id={
-            'type': type_name,
-            'index': value,
-        },
-        className='me-1 star-button',
-        outline=True,
-        style={
-            'display': 'inline-block',
-            'backgroundColor': normal_bg_color,
-            'width': '100%',
-            'opacity': 1,
-        },
-        n_clicks=0,
-    )
-
-
 def star_filter_section(available_stars=star_placeholder):
-    standard_stars = [s for s in available_stars if s != 0.25]
-    has_selected = 0.25 in available_stars
-
-    star_buttons = [
-        create_star_button(
-            star,
-            inverted_michelin_stars(star) if star in [1, 2, 3] else inverted_bib_gourmand(),
-            type_name='filter-button-mainpage',
-        )
-        for star in standard_stars
-    ]
-
-    toggle_button = html.Button(
-        'Selected',
-        id='toggle-selected-btn',
-        n_clicks=0,
-        className='selected-toggle-button',
-        style={'display': 'block'},
-    )
-
-    def hidden_toggle_button():
-        return html.Button('', id='toggle-selected-btn', n_clicks=1, style={'display': 'none'})
-
-    # Shared layout title (filter is hidden but title remains for consistency)
-    title = html.H6('Filter by Rating', className='star-select-title')
-
-    # Case 1: inline (fits in same row)
-    if has_selected and 1 <= len(standard_stars) <= 3:
-        star_buttons.append(toggle_button)
-        return html.Div(
-            [title, html.Div(star_buttons, className='star-filter-buttons')],
-            className='star-filter-section',
-            id='star-filter',
-            style={'display': 'none'},
-        )
-
-    # Case 2: only 0.25 available → show selected on its own row, 50% width
-    elif has_selected and not standard_stars:
-        return html.Div(
-            [
-                title,
-                html.Div(
-                    [
-                        html.Div(toggle_button, className='selected-toggle-inner'),
-                        html.Div(className='selected-toggle-spacer'),
-                    ],
-                    className='selected-toggle-wrapper',
-                ),
-            ],
-            className='star-filter-section',
-            id='star-filter',
-            style={'display': 'none'},
-        )
-
-    # Case 3: single available bib → show on its own row, 50% width
-    elif not has_selected and standard_stars == [0.5]:
-        return html.Div(
-            [
-                title,
-                html.Div(
-                    [
-                        html.Div(star_buttons[0], className='selected-toggle-inner'),
-                        html.Div(className='selected-toggle-spacer'),
-                    ],
-                    className='selected-toggle-wrapper',
-                ),
-                hidden_toggle_button(),
-            ],
-            className='star-filter-section',
-            id='star-filter',
-            style={'display': 'none'},
-        )
-
-    # Case 4: selected on a new row, wrapped in its own aligned container
-    elif has_selected:
-        return html.Div(
-            [
-                title,
-                html.Div(star_buttons, className='star-filter-buttons'),
-                html.Div(
-                    [
-                        html.Div(toggle_button, className='selected-toggle-inner'),
-                        html.Div(className='selected-toggle-spacer'),
-                        html.Div(className='selected-toggle-spacer'),
-                        html.Div(className='selected-toggle-spacer'),
-                    ],
-                    className='selected-toggle-wrapper',
-                ),
-            ],
-            className='star-filter-section',
-            id='star-filter',
-            style={'display': 'none'},
-        )
-
-    # Case 5: no toggle at all (fallback)
-    else:
-        return html.Div(
-            [
-                title,
-                html.Div(star_buttons, className='star-filter-buttons'),
-                hidden_toggle_button(),
-            ],
-            className='star-filter-section',
-            id='star-filter',
-            style={'display': 'none'},
-        )
+    # Return an empty div or simply remove the section entirely,
+    # but for structure preservation we'll return a hidden empty div.
+    return html.Div(id='star-filter', style={'display': 'none'})
 
 
 def get_main_content_with_city_match(unique_regions):

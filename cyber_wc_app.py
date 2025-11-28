@@ -139,15 +139,26 @@ def display_page(pathname):
 # Toggle nav menu open/closed
 @app.callback(
     Output('navigation-menu', 'className'),
-    Input('hamburger-icon', 'n_clicks'),
+    [Input('hamburger-icon', 'n_clicks'), Input('url', 'pathname')],
     State('navigation-menu', 'className'),
     prevent_initial_call=True,
 )
-def toggle_menu_class(n_clicks, current_class):
-    if current_class == 'nav-dropdown':
-        return 'nav-dropdown visible'
-    else:
+def toggle_menu_class(n_clicks, pathname, current_class):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        raise PreventUpdate
+
+    trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    # If navigation occurred, always close the menu
+    if trigger_id == 'url':
         return 'nav-dropdown'
+
+    # Hamburger logic
+    if 'visible' in current_class:
+        return 'nav-dropdown'
+    else:
+        return 'nav-dropdown visible'
 
 
 @app.callback(

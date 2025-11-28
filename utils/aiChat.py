@@ -24,6 +24,8 @@ Be conversational, informative, and engaging. If you don't know something specif
 Always respond in a friendly and helpful manner.
 
 Answer in the same language as the user use, particularly English or Chinese.
+
+Output your answer in pure text rather than markdown format.
 """
 
 
@@ -66,13 +68,13 @@ def get_ai_response(user_message: str, conversation_history: list = None) -> dic
             messages.extend(recent_history)
         
         # Add current user message
-        messages.append({"role": "user", "content": user_message})
+        messages.append({"role": "user", "content": user_message + "\n Output your answer in pure text rather than markdown format."})
         
         # Make API request
         response = client.chat.completions.create(
             model=DEEPSEEK_MODEL,
             messages=messages,
-            temperature=1.0,
+            temperature=0.6,
             max_tokens=1000
         )
         
